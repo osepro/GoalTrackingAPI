@@ -5,45 +5,8 @@ const Goal=require('../models/goals');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
-router.get('/',authorize,(req,res,next) => {
-    const token = req.headers.authorization.split(" ")[1];
-    const decoded=jwt.decode(token,{
-        complete:true
-    });
-    const emp=decoded.payload.email;
 
-    Goal.find({"email":emp})
-    .exec()
-    .then(docs => {
-        res.status(200).json(docs);
-    })
-    .catch(err => {
-        res.status(500).json({
-            message:"No goals Found For User"
-        })
-    });
-});
-
-router.get('/:goalId',authorize,(req,res,next) => {
-    const token = req.headers.authorization.split(" ")[1];
-    const decoded=jwt.decode(token,{
-        complete:true
-    });
-    const emp=decoded.payload.email;
-
-    Goal.find({'_id':req.params.goalId,'email':emp})
-    .exec()
-    .then(docs => {
-        res.status(200).json(docs);
-    })
-    .catch(err => {
-        res.status(500).json({
-            message:"No goals Found"
-        })
-    });
-});
-
-
+// Route to add a new goal
 router.post('/add',authorize,(req,res,next) => {
 
     const token = req.headers.authorization.split(" ")[1];
@@ -74,7 +37,47 @@ router.post('/add',authorize,(req,res,next) => {
     });
 });
 
+// Route to display all goals
+router.get('/',authorize,(req,res,next) => {
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded=jwt.decode(token,{
+        complete:true
+    });
+    const emp=decoded.payload.email;
 
+    Goal.find({"email":emp})
+    .exec()
+    .then(docs => {
+        res.status(200).json(docs);
+    })
+    .catch(err => {
+        res.status(500).json({
+            message:"No goals Found For User"
+        })
+    });
+});
+
+// Route to get a particular goal details
+router.get('/:goalId',authorize,(req,res,next) => {
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded=jwt.decode(token,{
+        complete:true
+    });
+    const emp=decoded.payload.email;
+
+    Goal.find({'_id':req.params.goalId,'email':emp})
+    .exec()
+    .then(docs => {
+        res.status(200).json(docs);
+    })
+    .catch(err => {
+        res.status(500).json({
+            message:"No goals Found"
+        })
+    });
+});
+
+// Update/add milestone
 router.patch('/update/:goalId',authorize,(req,res,next)=>{
     
     const token = req.headers.authorization.split(" ")[1];
@@ -83,7 +86,7 @@ router.patch('/update/:goalId',authorize,(req,res,next)=>{
     });
     const emp=decoded.payload.email;
 
-    Goal.updateOne({'_id':req.params.goalId,'email':emp},{$push:{'milestone':req.body.milestone}}).
+    Goal.updateOne({'_id':req.params.goalId},{$push:{'milestone':req.body.milestone}}).
     exec()
     .then(result => {
         if(result){
@@ -107,6 +110,7 @@ router.patch('/update/:goalId',authorize,(req,res,next)=>{
     });
 });
 
+// Route to delete a goal
 router.delete('/delete/:goalId',authorize,(req,res,next)=>{
         
     const token = req.headers.authorization.split(" ")[1];
@@ -118,7 +122,7 @@ router.delete('/delete/:goalId',authorize,(req,res,next)=>{
     Goal.deleteOne({_id:req.params.goalId,'email':emp})
     .exec()
     .then(results => {
-        if(result){
+        if(results){
         res.status(200).json({
             message:"Goal succssfully deleted"
         });
@@ -136,7 +140,5 @@ router.delete('/delete/:goalId',authorize,(req,res,next)=>{
     })
 })      
 });
-//});
-
 
 module.exports=router;

@@ -19,6 +19,7 @@ db.on('error', (err) => {
 
 
 const app=express();
+
 const goalsRoutes = require('./api/routes/goals');
 const signupRoutes = require('./api/routes/user');
 
@@ -28,10 +29,25 @@ mongoose.set('useCreateIndex', true);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+// Handling CORS errors
+app.use((req,res,next) => {
+    res.header('Access-Control-Allow-Origin','*');
+    res.header('Access-Control-Allow-Headers','Orign, X-Requested-With, Content-Type, Accept, Authorization');
 
+    if(req.method === 'OPTIONS')
+    {
+        res.header('Access-Control-Allow-Methods','PUT, POST, PATCH, DELETE, GET');
+        return res.status(200).json({});
+    }
+    next();
+});
+
+// Routes handling requests
 app.use('/goals',goalsRoutes);
 app.use('/user',signupRoutes);
 
+
+// Error handling 
 app.use((req,res,next) => {
     const error = new Error("Not Authorized");
     error.status=404;
